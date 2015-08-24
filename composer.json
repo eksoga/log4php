@@ -1,0 +1,13 @@
+{
+    "name": "eksoga/log4php",
+    "description": "Apache Log4PHP extension",
+    "license": "BSD-3-Clause",
+    "autoload": {
+        "psr-4": {
+            "Eksoga\\log4php\\": "src/main/php"
+        }
+    },
+    "require": {
+        "apache/log4php": "2.3.*"
+    }
+}
