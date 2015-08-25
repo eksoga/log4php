@@ -54,6 +54,19 @@ class LoggerLayoutHtml extends \LoggerLayout {
 	protected $title = "Log4php Log Messages";
 	
 	/**
+	 * Path to file header html layout
+	 */
+	protected $htmlHeader = "";
+	/**
+	 * Path to file body html layout
+	 */
+	protected $htmlBody = "";
+	/**
+	 * Path to file footer html layout
+	 */
+	protected $htmlFooter = "";
+	
+	/**
 	 * The <b>LocationInfo</b> option takes a boolean value. By
 	 * default, it is set to false which means there will be no location
 	 * information output by this layout. If the the option is set to
@@ -107,100 +120,59 @@ class LoggerLayoutHtml extends \LoggerLayout {
 	}
 	
 	/**
+	 * The <b>htmlBody</b> option takes a String value. This option sets the
+	 * file header layout for message.
+	 */
+	public function setHtmlHeader($file) {
+	    $this->setString('htmlHeader', $file);
+	}
+	
+	/**
+	 * The <b>htmlBody</b> option takes a String value. This option sets the
+	 * file repeated body layout for message.
+	 */
+	public function setHtmlBody($file) {
+	    $this->setString('htmlBody', $file);
+	}
+	
+	/**
+	 * The <b>htmlBody</b> option takes a String value. This option sets the
+	 * file footer layout for message.
+	 */
+	public function setHtmlFooter($file) {
+	    $this->setString('htmlFooter', $file);
+	}
+	
+	/**
 	 * @param LoggerLoggingEvent $event
 	 * @return string
 	 */
 	public function format(\LoggerLoggingEvent $event) {
-		$sbuf = PHP_EOL . "<tr>" . PHP_EOL;
-	
-		$sbuf .= "<td>";
-		$sbuf .= round(1000 * $event->getRelativeTime());
-		$sbuf .= "</td>" . PHP_EOL;
-	
-		$sbuf .= "<td title=\"" . $event->getThreadName() . " thread\">";
-		$sbuf .= $event->getThreadName();
-		$sbuf .= "</td>" . PHP_EOL;
-	
-		$sbuf .= "<td title=\"Level\">";
-		
-		$level = $event->getLevel();
-		
-		if ($level->equals(\LoggerLevel::getLevelDebug())) {
-			$sbuf .= "<font color=\"#339933\">$level</font>";
-		} else if ($level->equals(\LoggerLevel::getLevelWarn())) {
-			$sbuf .= "<font color=\"#993300\"><strong>$level</strong></font>";
-		} else {
-			$sbuf .= $level;
-		}
-		$sbuf .= "</td>" . PHP_EOL;
-	
-		$sbuf .= "<td title=\"" . htmlentities($event->getLoggerName(), ENT_QUOTES) . " category\">";
-		$sbuf .= htmlentities($event->getLoggerName(), ENT_QUOTES);
-		$sbuf .= "</td>" . PHP_EOL;
-	
-		if ($this->locationInfo) {
-			$locInfo = $event->getLocationInformation();
-			$sbuf .= "<td>";
-			$sbuf .= htmlentities($locInfo->getFileName(), ENT_QUOTES). ':' . $locInfo->getLineNumber();
-			$sbuf .= "</td>" . PHP_EOL;
-		}
-
-		$sbuf .= "<td title=\"Message\">";
-		$sbuf .= htmlentities($event->getRenderedMessage(), ENT_QUOTES);
-		$sbuf .= "</td>" . PHP_EOL;
-
-		$sbuf .= "</tr>" . PHP_EOL;
-		
-		if ($event->getNDC() != null) {
-			$sbuf .= "<tr><td bgcolor=\"#EEEEEE\" style=\"font-size : xx-small;\" colspan=\"6\" title=\"Nested Diagnostic Context\">";
-			$sbuf .= "NDC: " . htmlentities($event->getNDC(), ENT_QUOTES);
-			$sbuf .= "</td></tr>" . PHP_EOL;
-		}
-		return $sbuf;
+	    ob_start();
+	    include($this->htmlBody);
+	    $sbuf = ob_get_clean();
+	    return $sbuf;
 	}
 
 	/**
 	 * @return string Returns appropriate HTML headers.
 	 */
-	public function getHeader() {
-		$sbuf = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">" . PHP_EOL;
-		$sbuf .= "<html>" . PHP_EOL;
-		$sbuf .= "<head>" . PHP_EOL;
-		$sbuf .= "<title>" . $this->title . "</title>" . PHP_EOL;
-		$sbuf .= "<style type=\"text/css\">" . PHP_EOL;
-		$sbuf .= "<!--" . PHP_EOL;
-		$sbuf .= "body, table {font-family: arial,sans-serif; font-size: x-small;}" . PHP_EOL;
-		$sbuf .= "th {background: #F28D1A; color: #FFFFFF; text-align: left;}" . PHP_EOL;
-		$sbuf .= "-->" . PHP_EOL;
-		$sbuf .= "</style>" . PHP_EOL;
-		$sbuf .= "</head>" . PHP_EOL;
-		$sbuf .= "<body bgcolor=\"#FFFFFF\" topmargin=\"6\" leftmargin=\"6\">" . PHP_EOL;
-		$sbuf .= "<hr size=\"1\" noshade>" . PHP_EOL;
-		$sbuf .= "Log session start time " . strftime('%c', time()) . "<br>" . PHP_EOL;
-		$sbuf .= "<br>" . PHP_EOL;
-		$sbuf .= "<table cellspacing=\"0\" cellpadding=\"4\" border=\"1\" bordercolor=\"#224466\" width=\"100%\">" . PHP_EOL;
-		$sbuf .= "<tr>" . PHP_EOL;
-		$sbuf .= "<th>Time</th>" . PHP_EOL;
-		$sbuf .= "<th>Thread</th>" . PHP_EOL;
-		$sbuf .= "<th>Level</th>" . PHP_EOL;
-		$sbuf .= "<th>Category</th>" . PHP_EOL;
-		if ($this->locationInfo) {
-			$sbuf .= "<th>File:Line</th>" . PHP_EOL;
-		}
-		$sbuf .= "<th>Message</th>" . PHP_EOL;
-		$sbuf .= "</tr>" . PHP_EOL;
-
-		return $sbuf;
+	public function getHeader() 
+	{
+	    ob_start();
+	    include($this->htmlHeader);
+	    $sbuf = ob_get_clean();
+	    return $sbuf;
 	}
 
 	/**
 	 * @return string Returns the appropriate HTML footers.
 	 */
-	public function getFooter() {
-		$sbuf = "</table>" . PHP_EOL;
-		$sbuf .= "<br>" . PHP_EOL;
-		$sbuf .= "</body></html>";
-
-		return $sbuf;
+	public function getFooter() 
+	{
+	    ob_start();
+	    include($this->htmlFooter);
+	    $sbuf = ob_get_clean();
+	    return $sbuf;
 	}
 }
